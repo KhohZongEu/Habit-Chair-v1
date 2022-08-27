@@ -320,6 +320,7 @@ void sendDataToFirebase(){
     Firebase.RTDB.setInt(&fbdo, "data/online/state", onlineState);
     Firebase.RTDB.setInt(&fbdo, "data/occupancy/status", occupancy);
 }
+
 }
 
 
