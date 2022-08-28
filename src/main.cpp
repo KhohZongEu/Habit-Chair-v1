@@ -1,12 +1,13 @@
 #include <Arduino.h>
 
+
 //-------------------Firebase and WIFI--------------------
 #include <WiFi.h>
 #include <Firebase_ESP_Client.h>
 
 //---------------------Wifi Info-------------------------
-#define WIFI_SSID "CEC"
-#define WIFI_PASSWORD "CEC_2018"
+#define WIFI_SSID "Nemo5"
+#define WIFI_PASSWORD "Nem0123456789"
 
 //--------------------Firebase Info-------------------------
 #define API_KEY "AIzaSyAHmdwFtSJ7YgBuNHSVdR9mTFHPBYi3Ta4"
@@ -41,8 +42,8 @@ bool audioPlaying;
 
 //-----------------------------------timer----------------------------------------
 unsigned long timePrevMillis;
-unsigned long timeCurrentMillis;
 unsigned long trickPreventionMillis;
+unsigned long motorPrevMillis;
 
 int Seconds = 0;
 int Minutes = 0;
@@ -258,7 +259,6 @@ void vibratorControl(){
       delay(500);
       digitalWrite(motorPin,LOW);
       delay(500);
-      
     }
     warnings = 0;
   }
@@ -292,8 +292,7 @@ void extendedSeating(){
 // -----------------------------Timer----------------------------------
 void Timer(){
   if(occupancy == true){
-    timeCurrentMillis = millis();
-    if((timeCurrentMillis - timePrevMillis) > 1000){
+    if((millis() - timePrevMillis) > 1000){
       Seconds++;
       timePrevMillis = millis();
     }
@@ -337,4 +336,5 @@ void loop(){
 
 //------------------------sitting Time----------------
   extendedSeating();
+
 }
