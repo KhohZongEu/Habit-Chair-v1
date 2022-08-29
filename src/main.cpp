@@ -225,6 +225,7 @@ void postureCheck(){
           myMP3.volume(30);
           myMP3.play(2);
           warnings++;
+          violations++;
         }
           
         break;
@@ -233,6 +234,7 @@ void postureCheck(){
           myMP3.volume(30);
           myMP3.play(3);
           warnings++;
+          violations++;
         }
         
         break;
@@ -244,6 +246,7 @@ void postureCheck(){
           myMP3.volume(30);
           myMP3.play(1);
           warnings++;
+          violations++;
         }
         break;
     }
@@ -255,10 +258,10 @@ void postureCheck(){
 void vibratorControl(){
   if (warnings > 5){
     for(int motor=0; motor < 10;motor++){
-      digitalWrite(motorPin, HIGH);
-      delay(500);
-      digitalWrite(motorPin,LOW);
-      delay(500);
+      if((millis() - motorPrevMillis) > 499){
+        motorPrevMillis = millis();
+        digitalWrite(motorPin, !digitalRead(motorPin));
+      }
     }
     warnings = 0;
   }
