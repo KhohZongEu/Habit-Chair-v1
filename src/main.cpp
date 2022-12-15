@@ -6,8 +6,8 @@
 #include <Firebase_ESP_Client.h>
 
 //---------------------Wifi Info-------------------------
-#define WIFI_SSID "CEC"
-#define WIFI_PASSWORD "CEC_2018"
+#define WIFI_SSID "Nemo5"
+#define WIFI_PASSWORD "Nem0123456789"
 
 //--------------------Firebase Info-------------------------
 #define API_KEY "AIzaSyAHmdwFtSJ7YgBuNHSVdR9mTFHPBYi3Ta4"
@@ -15,7 +15,7 @@
 #define USER_EMAIL "esp1@gmail.com"
 #define USER_PASSWORD "123456"
 
-//----------------------Firebase Init---------------------
+//----------------------Wifi / Firebase Init---------------------
 FirebaseData fbdo;
 FirebaseAuth auth;
 FirebaseConfig config;
@@ -23,10 +23,15 @@ unsigned long sendDataPrevMillis = 0;
 int count = 0;
 bool signupOK = false;
 
+TaskHandle_t connectWifi;
 TaskHandle_t firebaseUpload;
+TaskHandle_t checkPosture;
 
 //-------------------------Running LED---------------------
-#define Running 2
+#define onBoard 2
+unsigned long prevLEDmillis;
+int interval = 1000;
+int LEDstate = LOW;
 
 //--------------------Time switch--------------------------
 #define silentSwitch 23
@@ -280,20 +285,54 @@ void Timer(){
   }
 }
 
+
+
+//-----------------------------Connect to WiFi-------------------------------
+void connectToWifi(void * pvParameters){
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+    Serial.print("Connecting to Wi-Fi");
+  
+    while (WiFi.status() != WL_CONNECTED){
+      Serial.print(".");
+      delay(300);
+    }
+  
+    Serial.println();
+    Serial.print("Connected with IP: ");
+    Serial.println(WiFi.localIP());
+    Serial.println();
+
+    /* Assign the api key (required) */
+    config.api_key = API_KEY;
+
+    /* Assign the RTDB URL (required) */
+    config.database_url = DATABASE_URL;
+
+    // Assign the user sign in credentials
+    auth.user.email = USER_EMAIL;
+    auth.user.password = USER_PASSWORD;
+
+    fbdo.setResponseSize(4096);
+
+    Firebase.begin(&config, &auth);
+    Firebase.reconnectWiFi(true);
+    signupOK = true;
+}
+
 //--------------------------Firebase Send Data------------------------------
-
 void sendDataToFirebase(void * pvParameters){
-  if (Firebase.ready() && signupOK && (millis() - sendDataPrevMillis > 15000 || sendDataPrevMillis == 0)){
-    sendDataPrevMillis = millis();
-    Firebase.RTDB.setInt(&fbdo, "data/time/hours", Hours);
-    Firebase.RTDB.setInt(&fbdo, "data/time/minutes", Minutes);
-    Firebase.RTDB.setInt(&fbdo, "data/time/seconds", Seconds);
-    Firebase.RTDB.setInt(&fbdo, "data/violations/times", violations);  
-    Firebase.RTDB.setInt(&fbdo, "data/online/state", onlineState);
-    Firebase.RTDB.setInt(&fbdo, "data/occupancy/status", occupancy);
+  for(;;){
+    if (Firebase.ready() && signupOK && (millis() - sendDataPrevMillis > 15000 || sendDataPrevMillis == 0)){
+      sendDataPrevMillis = millis();
+      Firebase.RTDB.setInt(&fbdo, "data/time/hours", Hours);
+      Firebase.RTDB.setInt(&fbdo, "data/time/minutes", Minutes);
+      Firebase.RTDB.setInt(&fbdo, "data/time/seconds", Seconds);
+      Firebase.RTDB.setInt(&fbdo, "data/violations/times", violations);  
+      Firebase.RTDB.setInt(&fbdo, "data/online/state", onlineState);
+      Firebase.RTDB.setInt(&fbdo, "data/occupancy/status", occupancy);
+    }
+  }
 }
-}
-
 
 void setup(){
    //---------------------------Start communication----------------------------
@@ -301,7 +340,7 @@ void setup(){
   mySerial.begin(9600);
 
   //-------------------------------Running LED--------------------------------
-  pinMode(Running, OUTPUT);
+  pinMode(onBoard, OUTPUT);
 
   //-----------------------timeSwitch---------------------
   pinMode(silentSwitch, INPUT_PULLUP);
@@ -313,55 +352,38 @@ void setup(){
   pinMode(PS4,INPUT);
   pinMode(PS5,INPUT);
   pinMode(PS6,INPUT);
-  pinMode(Running,HIGH);
   pinMode(motorPin,OUTPUT);
-  
 
   //---------------------------DF Player Mini setup---------------------------
   myMP3.begin(mySerial);
   myMP3.volume(30);
-
-  //-----------------------------Connect to WiFi-------------------------------
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  Serial.print("Connecting to Wi-Fi");
   
-  while (WiFi.status() != WL_CONNECTED){
-    Serial.print(".");
-    delay(300);
-  }
-  
-  Serial.println();
-  Serial.print("Connected with IP: ");
-  Serial.println(WiFi.localIP());
-  Serial.println();
-
-   /* Assign the api key (required) */
-  config.api_key = API_KEY;
-
-  /* Assign the RTDB URL (required) */
-  config.database_url = DATABASE_URL;
-
-  // Assign the user sign in credentials
-  auth.user.email = USER_EMAIL;
-  auth.user.password = USER_PASSWORD;
-
-  fbdo.setResponseSize(4096);
-
-  Firebase.begin(&config, &auth);
-  Firebase.reconnectWiFi(true);
-  signupOK = true;
-  
-  xTaskCreatePinnedToCore(sendDataToFirebase,   
-                    "firebaseUpload",    
-                    10000,       
-                    NULL,        
-                    1,           
-                    &firebaseUpload,      
-                    0);          
+  //Connect to Wifi
+  //  xTaskCreatePinnedToCore(connectToWifi,   
+  //                           "wifiConnection",    
+  //                           10000,       
+  //                           NULL,        
+  //                           1,           
+  //                           &connectWifi,      
+  //                           0);          
+   
+  //Send data to Firebase
+    // xTaskCreatePinnedToCore(sendDataToFirebase,   
+    //                          "firebaseUpload",    
+    //                          10000,       
+    //                          NULL,        
+    //                          tskIDLE_PRIORITY,           
+    //                          &firebaseUpload,      
+    //                          0);          
+                  
 }
 
 void loop(){ 
-  digitalWrite(Running,HIGH);
+  if((millis() - prevLEDmillis) >= interval){
+    prevLEDmillis = millis();
+    digitalWrite(onBoard, LEDstate);
+    LEDstate = !LEDstate;
+  }
 //--------------------------Run postureCheck() -------------------------------
    postureCheck();
 
