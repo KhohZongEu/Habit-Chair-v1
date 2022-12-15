@@ -36,7 +36,7 @@ int maxSittingTime;
 
 //------------------------------DF Player Mini------------------------------
 #include <DFPlayerMini_Fast.h>
-#include <SoftwareSerial.h>  //file 0000 is bad posture, 0001 is sitting time, 0002 is left leg, 0003 is right leg
+#include <SoftwareSerial.h>  //file 0000 is bad posture, 0001 is sitting time, 0002 is left leg, 0003 is right leg, 0004 is correct posture
 SoftwareSerial mySerial(25,26);//Tx,Rx
 DFPlayerMini_Fast myMP3;
 uint8_t volume = 30; // max = 30
@@ -148,7 +148,7 @@ void postureCheck(){
     Serial.println("not occupied");
     Serial.println(WiFi.localIP());
     occupancy = false;
-    States = 1;
+    States = 4;
     
   }else if((Sensor5average > 0) && (Sensor6average > 0)){ 
     Serial.println("Back lean");
@@ -165,8 +165,11 @@ void postureCheck(){
 
      switch(States){
        case 1:
+        if(audioPlaying == false){
+          myMP3.volume(30);
+          myMP3.play(4);
+        }
          break;
-
        case 2:
          if(audioPlaying == false){
            myMP3.volume(30);
