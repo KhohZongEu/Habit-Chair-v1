@@ -180,6 +180,7 @@ void postureCheck(){
         if(audioPlaying == false){
           myMP3.volume(30);
           myMP3.play(4);
+          crtposture = false;
          }
         }
          break;
@@ -317,6 +318,7 @@ void connectToWifi(void * pvParameters){
     Firebase.begin(&config, &auth);
     Firebase.reconnectWiFi(true);
     signupOK = true;
+    vTaskDelete(connectWifi);
 }
 
 //--------------------------Firebase Send Data------------------------------
@@ -359,22 +361,22 @@ void setup(){
   myMP3.volume(30);
   
   //Connect to Wifi
-  //  xTaskCreatePinnedToCore(connectToWifi,   
-  //                           "wifiConnection",    
-  //                           10000,       
-  //                           NULL,        
-  //                           1,           
-  //                           &connectWifi,      
-  //                           0);          
+    xTaskCreatePinnedToCore(connectToWifi,   
+                             "wifiConnection",    
+                             10000,       
+                             NULL,        
+                             1,           
+                             &connectWifi,      
+                             0);          
    
   //Send data to Firebase
-    // xTaskCreatePinnedToCore(sendDataToFirebase,   
-    //                          "firebaseUpload",    
-    //                          10000,       
-    //                          NULL,        
-    //                          tskIDLE_PRIORITY,           
-    //                          &firebaseUpload,      
-    //                          0);          
+    xTaskCreatePinnedToCore(sendDataToFirebase,   
+                             "firebaseUpload",    
+                             10000,       
+                             NULL,        
+                             tskIDLE_PRIORITY,           
+                             &firebaseUpload,      
+                             0);          
                   
 }
 
@@ -384,18 +386,16 @@ void loop(){
     digitalWrite(onBoard, LEDstate);
     LEDstate = !LEDstate;
   }
-//--------------------------Run postureCheck() -------------------------------
-   postureCheck();
+ //--------------------------Run postureCheck() -------------------------------
+    postureCheck();
 
-//---------------------Run Backup Vibrator Alert System-----------------------
- if(switchState == true){
-   vibratorControl();
- }
+ //---------------------Run Backup Vibrator Alert System-----------------------
+  if(switchState == true){
+    vibratorControl();
+  }
 
-//----------------------------Send Data to Firebase-----------------------------
-  // sendDataToFirebase();
 
-//------------------------sitting Time----------------
-  silent();
+ //------------------------sitting Time----------------
+   silent();
 
 }
