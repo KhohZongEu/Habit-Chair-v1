@@ -41,6 +41,7 @@ SoftwareSerial mySerial(25,26);//Tx,Rx
 DFPlayerMini_Fast myMP3;
 uint8_t volume = 30; // max = 30
 bool audioPlaying;
+bool crtposture;
 
 //-----------------------------------timer----------------------------------------
 unsigned long timePrevMillis;
@@ -131,33 +132,38 @@ void postureCheck(){
   if ((Sensor1average > 2500) && (Sensor2average > 2500) && (buttDifference > 0) && (buttDifference   < 500) && (Sensor4average > 100) && (Sensor3average > 100) && (Sensor6average <= 10) && (Sensor5average <= 10)) {
     Serial.println("posture correct");
     occupancy = true;
+    crtposture = true;
     States = 1;
     
 
   } else if ((Sensor4average == 0) && (Sensor3average > 100)) {
     Serial.println("right leg up");
     occupancy = true;
+    crtposture = false;
     States = 2;
 
   } else if ((Sensor3average == 0) && (Sensor4average > 100)) {
     Serial.println("left leg up");
     occupancy = true;
+    crtposture = false;
     States = 3;
 
   } else if ((Sensor1average < 400) && (Sensor2average < 300) && (Sensor3average <= 10) && (Sensor4average <= 10) && (Sensor5average < 50) && (Sensor6average < 50)) {
     Serial.println("not occupied");
-    Serial.println(WiFi.localIP());
     occupancy = false;
+    crtposture = false;
     States = 4;
     
   }else if((Sensor5average > 0) && (Sensor6average > 0)){ 
     Serial.println("Back lean");
     occupancy = true;
+    crtposture = false;
     States = 5;
     
   }else {
     Serial.println("posture incorrect");
     occupancy = true;
+    crtposture = false;
     States = 5;
     
     
@@ -165,9 +171,11 @@ void postureCheck(){
 
      switch(States){
        case 1:
+       if(crtposture == true){
         if(audioPlaying == false){
           myMP3.volume(30);
           myMP3.play(4);
+         }
         }
          break;
        case 2:
