@@ -6,8 +6,8 @@
 #include <Firebase_ESP_Client.h>
 
 //---------------------Wifi Info-------------------------
-#define WIFI_SSID "Nemo5"
-#define WIFI_PASSWORD "Nem0123456789"
+#define WIFI_SSID "CEC"
+#define WIFI_PASSWORD "CEC_2018"
 
 //--------------------Firebase Info-------------------------
 #define API_KEY "AIzaSyAHmdwFtSJ7YgBuNHSVdR9mTFHPBYi3Ta4"
@@ -91,6 +91,8 @@ int buttDifference = 0;
 
 
 void postureCheck(){
+
+    int t = 1; 
 
     for (int i1=0; i1 < 5; i1++) {
      Sensor1average = Sensor1average + analogRead(PS1);
@@ -179,9 +181,10 @@ void postureCheck(){
        if(crtposture == true){
         if(audioPlaying == false){
           myMP3.volume(30);
-          myMP3.play(4);
+          myMP3.play(5);
           crtposture = false;
-         }
+          t=0;
+          }
         }
          break;
        case 2:
@@ -193,10 +196,12 @@ void postureCheck(){
               if((millis() - motorPrevMillis) > 1000){
                 digitalWrite(motorPin, LOW);
                 motorPrevMillis = millis();
+                
             }
            }
            warnings++;
            violations++;
+            t =1;
          }
          break;
        case 3:
@@ -212,6 +217,7 @@ void postureCheck(){
            }
            warnings++;
            violations++;
+           t =1;
           }
          break;
        case 4:
@@ -229,6 +235,7 @@ void postureCheck(){
            }
            warnings++;
            violations++;
+           t =1;
          }
          break;
      }
