@@ -1,17 +1,19 @@
 #include <Arduino.h>
 
 
-//-------------------Firebase and WIFI--------------------
+//---------------------Firebase and WIFI--------------------
 #include <WiFi.h>
 #include <Firebase_ESP_Client.h>
 
-//---------------------Wifi Info-------------------------
-#define WIFI_SSID "CEC"
-#define WIFI_PASSWORD "CEC_2018"
+//-------------------------Wifi Info-------------------------
+#define WIFI_SSID "your-wifi-id"
+#define WIFI_PASSWORD "your-wifi-password"
 
-//--------------------Firebase Info-------------------------
-#define API_KEY "AIzaSyAHmdwFtSJ7YgBuNHSVdR9mTFHPBYi3Ta4"
-#define DATABASE_URL "https://habit-chair-default-rtdb.asia-southeast1.firebasedatabase.app"
+//---------------------------Firebase Info---------------------------
+#define API_KEY "your-api-key"
+#define DATABASE_URL "your-database-url"
+
+//--------------------Testing registration email-------------------------
 #define USER_EMAIL "esp1@gmail.com"
 #define USER_PASSWORD "123456"
 
@@ -91,7 +93,6 @@ int buttDifference = 0;
 
 
 void postureCheck(){
-
     int t = 1; 
 
     for (int i1=0; i1 < 5; i1++) {
@@ -124,7 +125,6 @@ void postureCheck(){
     }
     Sensor6average = Sensor6average/10;
 
-    
     buttDifference = Sensor1average - Sensor2average;
     
     if(buttDifference < 0){
@@ -241,7 +241,6 @@ void postureCheck(){
      }
  }
 
-
 //-----------------------Backup Vibrator Alert System------------------
 void vibratorControl(){
   if (warnings > 6){
@@ -267,7 +266,7 @@ void vibratorControl(){
   }
 }
 
-//------------------------------Sitting Time---------------------------------
+//------------------------------Silent Mode---------------------------------
 void silent(){
   switchState = digitalRead(silentSwitch);
   if(switchState == 0){
@@ -292,8 +291,6 @@ void Timer(){
     Hours = Minutes / 60;
   }
 }
-
-
 
 //-----------------------------Connect to WiFi-------------------------------
 void connectToWifi(void * pvParameters){
@@ -402,7 +399,7 @@ void loop(){
   }
 
 
- //------------------------sitting Time----------------
+ //------------------------Silent mode monitoring----------------
    silent();
 
 }
