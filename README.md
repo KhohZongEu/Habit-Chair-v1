@@ -1,6 +1,5 @@
 # Habit Chair v1
-
-![logo](/include/Habit%20Chair%20Logo.png | width=100)
+<img src="/include/Habit%20Chair%20Logo.png" alt="logo" width="100"/>
 
 A system to help correct the posture of a user using a series of force sensitive resistors
 
